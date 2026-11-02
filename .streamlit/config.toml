@@ -1,0 +1,26 @@
+# Streamlit configuration for the MT Trading Swarm dashboard (`streamlit run dashboard/app.py`).
+
+[server]
+# The dashboard is a read-mostly client of the API; it never needs uploads.
+maxUploadSize = 1
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+# Friendly in-app messages replace raw tracebacks (the app logs details server-side).
+showErrorDetails = "none"
+toolbarMode = "viewer"
+
+[theme]
+font = "sans-serif"
+baseRadius = "medium"
+
+[theme.light]
+primaryColor = "#2a78d6"
+backgroundColor = "#ffffff"
+
+[theme.dark]
+primaryColor = "#3987e5"
+backgroundColor = "#0e1117"

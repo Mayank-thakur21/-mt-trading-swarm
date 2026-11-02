@@ -1,0 +1,106 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mt-trading-swarm"
+version = "2.0.0"
+description = "Multi-agent paper-trading swarm: technical trend + Claude news sentiment + risk gate + execution, with backtesting, alerts, a REST API and a Streamlit dashboard."
+readme = "README.md"
+requires-python = ">=3.12"
+authors = [{ name = "Mayank Thakur" }]
+keywords = ["trading", "paper-trading", "multi-agent", "backtesting", "claude", "fastapi", "streamlit"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial :: Investment",
+]
+# Loose lower bounds for library installs; requirements.txt pins the exact, tested versions.
+dependencies = [
+    "anthropic>=2.3",
+    "openai>=3.42",
+    "yfinance>=1.7",
+    "pandas>=3.1",
+    "numpy>=2.5",
+    "fastapi>=0.162",
+    "uvicorn[standard]>=0.54",
+    "pydantic>=2.14",
+    "pydantic-settings>=2.16",
+    "SQLAlchemy>=2.1",
+    "streamlit>=1.66",
+    "plotly>=7.1",
+    "requests>=2.34",
+    "python-dotenv>=1.2",
+    "tzdata>=2025.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=9.2", "pytest-cov>=7.1", "ruff>=0.17", "httpx2>=2.16"]
+
+[project.scripts]
+mt-swarm-backtest = "trading_swarm.backtest.cli:main"
+
+# Only the engine is packaged. `dashboard/` (run with `streamlit run dashboard/app.py`)
+# and the `scripts/` wrappers are run from the checkout or the Docker image; installing
+# them would add generic top-level `dashboard` / `scripts` packages to site-packages.
+[tool.setuptools.packages.find]
+include = ["trading_swarm*"]
+
+# --------------------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "venv", "build", "dist"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "SIM", "RUF", "C4"]
+ignore = [
+    # Finance notation (×, −, σ, ≥) is deliberate in docstrings, comments and summaries.
+    "RUF001",
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# FastAPI's dependency-injection idiom calls Depends()/Query() in argument defaults.
+"trading_swarm/api/*.py" = ["B008"]
+# Tests favour readable literal tables over line-length purity.
+"tests/*.py" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["trading_swarm", "dashboard", "scripts"]
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+
+# --------------------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Import the package from the checkout without requiring `pip install -e .`.
+pythonpath = ["."]
+addopts = "-ra"
+filterwarnings = [
+    # Unclosed sockets / sqlite connections are bugs: fail loudly.
+    "error::ResourceWarning",
+]
+
+# --------------------------------------------------------------------------- coverage
+[tool.coverage.run]
+source = ["trading_swarm", "dashboard", "scripts"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+    "\\.\\.\\.$",
+    "if __name__ == .__main__.:",
+]

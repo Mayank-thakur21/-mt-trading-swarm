@@ -1,9 +1,18 @@
-fastapi==0.111.0
-uvicorn[standard]==0.29.0
-pydantic==2.7.1
-yfinance==0.2.40
-pandas==2.2.2
-numpy==1.26.4
-streamlit==1.35.0
-requests==2.31.0
-python-dotenv==1.0.1
+# Runtime dependencies, pinned to the versions the test suite is verified against.
+anthropic==2.3.0
+openai==3.42.1
+yfinance==1.7.0
+pandas==3.1.0
+numpy==2.5.4
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+pydantic==2.14.2
+pydantic-settings==2.16.2
+SQLAlchemy==2.1.6
+streamlit==1.66.1
+plotly==7.1.0
+requests==2.34.2
+python-dotenv==1.2.4
+# IANA time-zone data for the scheduler's America/New_York market hours: python:*-slim
+# images ship no system zoneinfo, and it otherwise arrives only via python-dateutil.
+tzdata==2026.6

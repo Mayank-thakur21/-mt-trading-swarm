@@ -1,0 +1,40 @@
+# --- Secrets / local config
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# --- Runtime data (SQLite portfolio, backtest output)
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+*.sqlite
+*.sqlite3
+results*.json
+backtest_results/
+
+# --- Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# --- Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# --- Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store

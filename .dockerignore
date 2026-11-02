@@ -1,0 +1,58 @@
+# Keep the build context small and keep secrets and local state out of every image.
+# The Dockerfile copies only requirements.txt, trading_swarm/, scripts/, dashboard/ and
+# .streamlit/config.toml; everything else here is excluded to keep the context lean.
+
+# --- Secrets and local configuration (never bake these into an image)
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+*.pem
+*.key
+
+# --- Runtime data: the SQLite portfolio lives on a volume, not in the image
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+results*.json
+backtest_results/
+
+# --- VCS, CI and container definitions
+.git/
+.gitignore
+.github/
+.dockerignore
+Dockerfile
+docker-compose*.yml
+compose*.yml
+
+# --- Python build artefacts and virtual environments
+**/__pycache__/
+**/*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# --- Tests, docs, tooling caches and coverage (not needed at runtime)
+tests/
+docs/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# --- Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store

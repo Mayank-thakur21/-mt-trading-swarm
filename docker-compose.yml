@@ -1,20 +1,70 @@
-version: "3.9"
+# MT Trading Swarm: API (FastAPI + scheduler) and dashboard (Streamlit).
+#
+#   cp .env.example .env        # optional; every setting has a safe default
+#   docker compose up --build   # API: http://localhost:8000/docs, UI: http://localhost:8501
+#
+# Paper trading only: no broker connection and no real money.
+#
+# Ports bind to 127.0.0.1 by default. Without API_KEYS the API is open to anyone who can
+# reach it, so only set API_BIND / DASHBOARD_BIND=0.0.0.0 after you have set API_KEYS.
+# Values in .env that contain "$" must be single-quoted: Compose interpolates $VAR.
+
+name: mt-trading-swarm
 
 services:
   api:
-    build: .
+    build:
+      context: .
+      target: api
+    image: mt-trading-swarm-api:2.0.0
+    # Every engine setting (LLM keys, SMTP, risk limits, ...) comes from .env when present.
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      # Fixed in-container path on the named volume below. This overrides any host
+      # path a local .env might set.
+      DATABASE_URL: sqlite:////app/data/trading_swarm.db
     ports:
-      - "8000:8000"
-    command: uvicorn api:app --host 0.0.0.0 --port 8000
+      - "${API_BIND:-127.0.0.1}:${API_PORT:-8000}:8000"
+    volumes:
+      - swarm-data:/app/data
+    # The Dockerfile HEALTHCHECK (GET /health) applies; the dashboard waits for it.
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    # Room for a running watchlist scan to finish and the broker to close cleanly.
+    stop_grace_period: 30s
     restart: unless-stopped
 
   dashboard:
-    build: .
-    ports:
-      - "8501:8501"
-    command: streamlit run dashboard.py --server.port=8501 --server.address=0.0.0.0
-    depends_on:
-      - api
+    build:
+      context: .
+      target: dashboard
+    image: mt-trading-swarm-dashboard:2.0.0
+    # The dashboard gets only the variables it reads, not the whole .env, so LLM and
+    # SMTP secrets never reach this container. ${...} values come from the shell or .env.
     environment:
-      - API_URL=http://api:8000
+      API_URL: http://api:8000
+      # Must be one of the API's API_KEYS when auth is enabled.
+      API_KEY: ${API_KEY:-}
+      API_TIMEOUT_SECONDS: ${API_TIMEOUT_SECONDS:-15}
+      API_LONG_TIMEOUT_SECONDS: ${API_LONG_TIMEOUT_SECONDS:-300}
+      # Off: visitors cannot point the dashboard server at other hosts.
+      DASHBOARD_ALLOW_URL_OVERRIDE: ${DASHBOARD_ALLOW_URL_OVERRIDE:-false}
+      # Gauge labels, used only if /health does not report the thresholds.
+      BUY_THRESHOLD: ${BUY_THRESHOLD:-0.25}
+      SELL_THRESHOLD: ${SELL_THRESHOLD:--0.25}
+    ports:
+      - "${DASHBOARD_BIND:-127.0.0.1}:${DASHBOARD_PORT:-8501}:8501"
+    depends_on:
+      api:
+        condition: service_healthy
+    init: true
+    security_opt:
+      - no-new-privileges:true
     restart: unless-stopped
+
+volumes:
+  # Paper portfolio, orders, trades, decisions, alert log and watchlist (SQLite).
+  swarm-data:

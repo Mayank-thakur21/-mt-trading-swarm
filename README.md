@@ -6,6 +6,7 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.66-FF4B4B?logo=streamlit&logoColor=white)
 ![Claude](https://img.shields.io/badge/LLM-Claude%20API-D97757?logo=anthropic&logoColor=white)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow)](LICENSE)
 
 A multi-agent **paper-trading** system. A technical **trend** agent and a **news-sentiment**
 agent (Claude by default) vote on each stock. A weighted consensus turns the votes into
@@ -38,6 +39,7 @@ dashboard**.
 - [Project structure](#project-structure)
 - [What changed in 2.0](#what-changed-in-20)
 - [Roadmap](#roadmap)
+- [License](#license)
 
 ## Features
 
@@ -1316,3 +1318,7 @@ these bugs:
 - A point-in-time news archive, so backtests can include sentiment.
 - Walk-forward parameter studies for thresholds, weights and ATR multiples.
 - More alert channels: Slack, Telegram, webhooks.
+
+## License
+
+[MIT](LICENSE) © 2026 Mayank Thakur
